@@ -1,130 +1,102 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br />
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener"
-        >vue-cli documentation</a
-      >.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel"
-          target="_blank"
-          rel="noopener"
-          >babel</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router"
-          target="_blank"
-          rel="noopener"
-          >router</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-vuex"
-          target="_blank"
-          rel="noopener"
-          >vuex</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint"
-          target="_blank"
-          rel="noopener"
-          >eslint</a
-        >
-      </li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li>
-        <a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a>
-      </li>
-      <li>
-        <a href="https://forum.vuejs.org" target="_blank" rel="noopener"
-          >Forum</a
-        >
-      </li>
-      <li>
-        <a href="https://chat.vuejs.org" target="_blank" rel="noopener"
-          >Community Chat</a
-        >
-      </li>
-      <li>
-        <a href="https://twitter.com/vuejs" target="_blank" rel="noopener"
-          >Twitter</a
-        >
-      </li>
-      <li>
-        <a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a>
-      </li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li>
-        <a href="https://router.vuejs.org" target="_blank" rel="noopener"
-          >vue-router</a
-        >
-      </li>
-      <li>
-        <a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-devtools#vue-devtools"
-          target="_blank"
-          rel="noopener"
-          >vue-devtools</a
-        >
-      </li>
-      <li>
-        <a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener"
-          >vue-loader</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-          rel="noopener"
-          >awesome-vue</a
-        >
-      </li>
-    </ul>
+    <el-upload
+      v-if="show"
+      class="avatar-uploader"
+      action="/api/uploadImg"
+      :show-file-list="false"
+      :on-success="handleAvatarSuccess"
+      :before-upload="beforeAvatarUpload"
+    >
+      <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+      <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+    </el-upload>
+    <div v-html="contentMsg"></div>
+    <hr />
+    <MsEditor
+      v-if="show"
+      v-model="contentMsg"
+      :image-upload-success="imageUploadSuccess"
+      :image-upload-before="beforeAvatarUpload"
+      imageUploadUrl="/api/uploadImg"
+    ></MsEditor>
+    <!--    -->
+    <TyEditor
+      v-model="contentMsg"
+      :image-upload-success="imageUploadSuccess"
+      :image-upload-before="beforeAvatarUpload"
+      imageUploadUrl="/api/uploadImg"
+    ></TyEditor>
   </div>
 </template>
 
 <script>
+import TyEditor from './tiny-editor'
 export default {
-  name: "HelloWorld",
+  name: 'HelloWorld',
+  components: { TyEditor },
   props: {
     msg: String
+  },
+  data() {
+    return {
+      show: false,
+      imageUrl: '',
+      contentMsg: 'https://dev-saas.oss-cn-beijing.aliyuncs.com/056eb234fa9844b0b7ec3e13bd39faf7.mp4'
+      // contentMsg:
+      //   '<figure class="image"><img src="../static/img/logo.png" alt="" width="256" height="62" />\n' +
+      //   '<figcaption>Caption</figcaption>\n' +
+      //   '</figure>\n'
+    }
+  },
+  methods: {
+    handleAvatarSuccess(res, file) {
+      console.log(res, 'res')
+      this.imageUrl = res.data.url || URL.createObjectURL(file.raw)
+    },
+    beforeAvatarUpload(file) {
+      const isJPG = ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)
+      const isLt2M = file.size / 1024 / 1024 < 10
+
+      if (!isJPG) {
+        alert('上传图片只能是 JPG 格式!')
+      }
+      if (!isLt2M) {
+        alert('上传图片大小不能超过 2MB!')
+      }
+      return isJPG && isLt2M
+    },
+    imageUploadSuccess(res, suc) {
+      return suc(res.data.url)
+    }
   }
-};
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-h3 {
-  margin: 40px 0 0;
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+.avatar-uploader .el-upload:hover {
+  border-color: #409eff;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px;
+  text-align: center;
+  border: 1px dashed #ccc;
 }
-a {
-  color: #42b983;
+.avatar {
+  width: 178px;
+  height: auto;
+  display: block;
 }
 </style>
