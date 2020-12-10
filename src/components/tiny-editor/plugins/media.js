@@ -1159,7 +1159,7 @@
   var createPreviewIframeNode = function(editor, node) {
     var previewWrapper
     var previewNode
-    var shimNode
+    // var shimNode
     var name = node.name
 
     previewWrapper = new global$7('span', 1)
@@ -1179,7 +1179,6 @@
       let b = /<source([\s]+|[\s]+[^<>]+[\s]+)src=(\"([^<>"\']*)\"|\'([^<>"\']*)\')[^<>]*>/gi
       let s = vd.toLowerCase().match(b)
       let src = RegExp.$3
-      console.log(src)
       previewNode.attr({
         src: src,
         controls: '', //显示播放工具就取消这行的注释
@@ -1193,6 +1192,7 @@
     } else {
       previewNode.attr({
         src: node.attr('src'),
+        controls: '',//显示播放工具就取消这行的注释
         allowfullscreen: node.attr('allowfullscreen'),
         style: node.attr('style'),
         class: node.attr('class'),
@@ -1203,10 +1203,10 @@
     }
     //莫若卿魔改结束部分
 
-    shimNode = new global$7('span', 1)
-    shimNode.attr('class', 'mce-shim')
+    // shimNode = new global$7('span', 1)
+    // shimNode.attr('class', 'mce-shim')
     previewWrapper.append(previewNode)
-    previewWrapper.append(shimNode)
+    // previewWrapper.append(shimNode)
     return previewWrapper
   }
   var retainAttributesAndInnerHtml = function(editor, sourceNode, targetNode) {
@@ -1356,14 +1356,14 @@
         }
       })
     })
-    editor.on('SetContent', function() {
-      editor.$('span.mce-preview-object').each(function(index, elm) {
-        var $elm = editor.$(elm)
-        if ($elm.find('span.mce-shim').length === 0) {
-          $elm.append('<span class="mce-shim"></span>')
-        }
-      })
-    })
+    // editor.on('SetContent', function() {
+    //   editor.$('span.mce-preview-object').each(function(index, elm) {
+    //     var $elm = editor.$(elm)
+    //     if ($elm.find('span.mce-shim').length === 0) {
+    //       $elm.append('<span class="mce-shim"></span>')
+    //     }
+    //   })
+    // })
   }
   var FilterContent = { setup: setup }
 

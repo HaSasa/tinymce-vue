@@ -26,6 +26,10 @@
       :image-upload-success="imageUploadSuccess"
       :image-upload-before="beforeAvatarUpload"
       imageUploadUrl="/api/uploadImg"
+      :file-upload-success="fileUploadSuccess"
+      :file-upload-before="beforeFileUpload"
+      :fileUploadData="fileUploadData"
+      file-upload-url="/xlive/internal/live-admin/v1/upload/file_internal"
     ></TyEditor>
   </div>
 </template>
@@ -42,11 +46,11 @@ export default {
     return {
       show: false,
       imageUrl: '',
-      contentMsg: 'https://dev-saas.oss-cn-beijing.aliyuncs.com/056eb234fa9844b0b7ec3e13bd39faf7.mp4'
-      // contentMsg:
-      //   '<figure class="image"><img src="../static/img/logo.png" alt="" width="256" height="62" />\n' +
-      //   '<figcaption>Caption</figcaption>\n' +
-      //   '</figure>\n'
+      contentMsg: 'https://dev-saas.oss-cn-beijing.aliyuncs.com/056eb234fa9844b0b7ec3e13bd39faf7.mp4',
+      fileUploadData: {
+        bucket: 'live',
+        content_type: ''
+      }
     }
   },
   methods: {
@@ -68,6 +72,34 @@ export default {
     },
     imageUploadSuccess(res, suc) {
       return suc(res.data.url)
+    },
+
+    fileUploadSuccess(cb, result) {
+      console.log(cb, result, ';ggg')
+      return cb(result.data.url)
+    },
+    beforeFileUpload(file) {
+      const types = ['png', 'jpg', 'jpeg', 'svga', 'gif', 'webp', 'csv', 'zip', 'md', 'pdf', 'wasm', 'mp3', 'mp4']
+      const exitIndex = types.findIndex((v) => file.name.indexOf(v) !== -1)
+      let type = types[exitIndex] || ''
+      this.fileUploadData.content_type = type
+      if (type === 'pdf') {
+        this.fileUploadData.content_type = 'application/pdf'
+      }
+      if (type === 'wasm') {
+        this.fileUploadData.content_type = 'application/wasm'
+      }
+
+      console.log(exitIndex, 'exitIndex')
+      // if (this.fileType === 'pdf') {
+      //   this.uploader.content_type = 'application/pdf'
+      // }
+      // if (this.fileType === 'wasm') {
+      //   this.uploader.content_type = 'application/wasm'
+      // }
+      // this.fileUploadData = ''
+      console.log(file, '1234')
+      return true
     }
   }
 }

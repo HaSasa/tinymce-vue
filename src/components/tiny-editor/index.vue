@@ -17,57 +17,34 @@ export default {
     event: 'change'
   },
   props: {
-    value: {
-      type: String,
-      default: ''
-    },
-    height: {
-      type: Number,
-      default: 500
-    },
-    plugins: {
-      type: [Array, String],
-      default: () => []
-    },
-    toolbar: {
-      type: [Array, String],
-      default: () => []
-    },
+    value: { type: String, default: '' },
+    height: { type: Number, default: 500 },
+    plugins: { type: [Array, String], default: () => [] },
+    toolbar: { type: [Array, String], default: () => [] },
     //  图片上传接口地址，不传，默认图片以base64形式存在
-    imageUploadUrl: {
-      type: String,
-      default: ''
-    },
+    imageUploadUrl: { type: String, default: '' },
     // 图片上传成功，需要return success(图片结果)
-    imageUploadSuccess: {
-      type: Function,
-      default: null
-    },
+    imageUploadSuccess: { type: Function, default: null },
     // 图片上传进度
-    imageUploadProgress: {
-      type: Function,
-      default: null
-    },
+    imageUploadProgress: { type: Function, default: null },
     // 图片上传前校验 reutrn true/false
-    imageUploadBefore: {
-      type: Function,
-      default: null
-    },
+    imageUploadBefore: { type: Function, default: null },
     // 图片上传接口接收的name属性
-    imageUploadName: {
-      type: String,
-      default: 'file'
-    },
+    imageUploadName: { type: String, default: 'file' },
+    // 图片上传的额外参数
+    imageUploadData: { type: Object, default: () => ({}) },
 
-    pasteFilter: {
-      type: Function,
-      default: null
-    },
+    // 文件上传地址
+    fileUploadUrl: { type: String, default: '' },
+    fileUploadBefore: { type: Function, default: null },
+    fileUploadSuccess: { type: Function, default: null },
+    fileUploadName: { type: String, default: 'file' },
+    // 文件上传额外参数
+    fileUploadData: { type: Object, default: () => ({}) },
+    fileUploadAccept: { type: String, default: '*' },
+    pasteFilter: { type: Function, default: null },
     // debug 模式
-    debug: {
-      type: Boolean,
-      default: false
-    }
+    debug: { type: Boolean, default: false }
   },
   data() {
     return {
@@ -87,6 +64,7 @@ export default {
         quickbars_selection_toolbar: 'bold italic | h1 h2 h3 forecolor backcolor blockquote removeformat quicklink',
         quickbars_insert_toolbar: 'quicklink quickimage quicktable',
         paste_retain_style_properties: 'color background backgroud-color text-align font-size', // 此项设置为空，则从word复制过来的样式，全部不保留
+        file_picker_types: 'file media',
         paste_preprocess: this.pastePreprocess,
         images_upload_handler: this.uploadImage,
         file_picker_callback: this.uploadFile,
@@ -143,10 +121,8 @@ export default {
       // 自定义校验，默认不执行
       const beforeRes = this.imageUploadBefore ? !!this.imageUploadBefore(blobInfo.blob()) : true
       if (!beforeRes) {
-        failure('图片校验失败')
         return false
       }
-
       if (this.imageUploadUrl) {
         let xhr, formData
         xhr = new XMLHttpRequest()
@@ -170,14 +146,16 @@ export default {
           // 上传成功回调函数，需要操作 return success(response.xxxx)
           that.imageUploadSuccess ? that.imageUploadSuccess(response, success) : success('data:image/jpeg;base64,' + blobInfo.base64())
         }
-
         xhr.onerror = function() {
           failure('由于传输错误导致图像上传失败. Code: ' + xhr.status)
         }
-
         formData = new FormData()
         formData.append(this.imageUploadName || 'file', blobInfo.blob(), blobInfo.filename())
-
+        if (Object.keys(this.imageUploadData).length) {
+          for (let key in this.imageUploadData) {
+            formData.append(key, this.imageUploadData[key])
+          }
+        }
         xhr.send(formData)
       } else {
         success('data:image/jpeg;base64,' + blobInfo.base64())
@@ -185,83 +163,70 @@ export default {
     },
     // 上传文件
     uploadFile(callback, value, meta) {
-      //文件分类
-      //   let filetype = '.pdf, .txt, .zip, .rar, .7z, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .mp3, .mp4'
-      //   //后端接收上传文件的地址
-      //   let upurl = '/demo/upfile.php'
-      //   //为不同插件指定文件类型及后端地址
-      //   switch (meta.filetype) {
-      //     case 'image':
-      //       filetype = '.jpg, .jpeg, .png, .gif'
-      //       upurl = 'upimg.php'
-      //       break
-      //     case 'media':
-      //       filetype = '.mp3, .mp4'
-      //       upurl = 'upfile.php'
-      //       break
-      //     case 'file':
-      //     default:
-      //   }
-      //   //模拟出一个input用于添加本地文件
-      //   const input = document.createElement('input')
-      //   input.setAttribute('type', 'file')
-      //   input.setAttribute('accept', filetype)
-      //   input.click()
-      //   input.onchange = function() {
-      //     const file = this.files[0]
-      //
-      //     let xhr, formData
-      //     console.log(file.name)
-      //     xhr = new XMLHttpRequest()
-      //     xhr.withCredentials = false
-      //     xhr.open('POST', upurl)
-      //     xhr.onload = function() {
-      //       var json
-      //       if (xhr.status != 200) {
-      //         alert('HTTP Error: ' + xhr.status)
-      //         return
-      //       }
-      //       json = JSON.parse(xhr.responseText)
-      //       if (!json || typeof json.location != 'string') {
-      //         alert('Invalid JSON: ' + xhr.responseText)
-      //         return
-      //       }
-      //       callback(json.location)
-      //     }
-      //     formData = new FormData()
-      //     formData.append('file', file, file.name)
-      //     xhr.send(formData)
-      //   }
-      // // 要先模拟出一个input用于上传本地文件
-      var input = document.createElement('input')
-      input.setAttribute('type', 'file')
-      // 你可以给input加accept属性来限制上传的文件类型
-      // 例如：input.setAttribute('accept', '.jpg,.png')
-      input.setAttribute('accept', '.doc,.docx,.ppt,.pptx,.pdf,.xlsx')
-      input.click()
-      input.onchange = function() {
-        var file = this.files[0]
+      const that = this
+      // 自定义校验，默认不执行
 
-        var xhr, formData
-        xhr = new XMLHttpRequest()
-        xhr.withCredentials = false
-        xhr.open('POST', '/demo/upimg.php')
-        xhr.onload = function() {
-          var json
-          if (xhr.status !== 200) {
-            this.$message.error('HTTP Error: ' + xhr.status)
-            return
+      //文件分类
+      let filetype = ''
+      //   //为不同插件指定文件类型及后端地址
+      switch (meta.filetype) {
+        case 'image':
+          filetype = '.jpg, .jpeg, .png, .gif, .webp'
+          break
+        case 'media':
+          filetype = '.mp3, .mp4'
+          break
+        case 'file':
+          filetype = this.fileUploadAccept
+          break
+        default:
+          return
+      }
+
+      if (this.fileUploadUrl) {
+        //   //模拟出一个input用于添加本地文件
+        const input = document.createElement('input')
+        input.setAttribute('type', 'file')
+        input.setAttribute('accept', filetype)
+        input.click()
+        input.onchange = function() {
+          const file = input.files[0]
+          const beforeRes = that.fileUploadBefore ? !!that.fileUploadBefore(file) : true
+          if (!beforeRes) {
+            return false
           }
-          json = JSON.parse(xhr.responseText)
-          if (!json || typeof json.location !== 'string') {
-            this.$message.error('Invalid JSON: ' + xhr.responseText)
-            return
+
+          let xhr, formData
+          xhr = new XMLHttpRequest()
+          xhr.withCredentials = false
+          xhr.open('POST', that.fileUploadUrl || '')
+          xhr.onload = function() {
+            let json
+            if (xhr.status !== 200) {
+              alert('HTTP Error: ' + xhr.status + ' ==> ' + xhr.statusText)
+              return
+            }
+            json = JSON.parse(xhr.responseText)
+            const cb = (url) => {
+              return callback(url, { text: file.name, title: file.name })
+            }
+            that.fileUploadSuccess ? that.fileUploadSuccess(cb, json) : callback('', { text: '', title: '' })
           }
-          callback(json.location)
+          formData = new FormData()
+          formData.append('file_up' || that.fileUploadName, file, file.name)
+          // 插入额外餐数
+          if (Object.keys(that.fileUploadData).length) {
+            for (let key in that.fileUploadData) {
+              formData.append(key, that.fileUploadData[key])
+            }
+          }
+          const cookie =
+            '_AJSESSIONID=8b23987a1d74b325eb3732740e707e91; username=hanyang; _gitlab_session=82e0b72e4f827b75ad35184a16e4fa8f; experimentation_subject_id=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkltUmpPR05sWkRGakxXWXdOVFF0TkRVNFpDMDRNak14TFRWbU5ERm1NRFJtTm1NellTST0iLCJleHAiOm51bGwsInB1ciI6ImNvb2tpZS5leHBlcmltZW50YXRpb25fc3ViamVjdF9pZCJ9fQ; known_sign_in=NHJnaFR5NzZyRHFvL2ppM0N2Tm5sYmtMRWFKZDlXckRydG4rUk9PRmZoMzNuZzBWNk1sMVl4Rm5wUG5QUHlJcmdVQXFiSnlUcC9iR0NNSlFRNjlnUVVCbXhkNXVINEhlMkJnT3FkVytRZGs0OWM2amRjem93Zm4vZE15NVk5L3UtLXNRR040SFg5MWFJaWpSRVJDNklROEE9PQ; mng-go=e04c83577c1389dd87d47af7dbea5d1e16c1e00f2f56a3b98668fc04b6503e94'
+          xhr.setRequestHeader('Cookie', cookie)
+          xhr.send(formData)
         }
-        formData = new FormData()
-        formData.append('file', file, file.name)
-        xhr.send(formData)
+      } else {
+        return false
       }
     },
     // 复制之前的过滤操作

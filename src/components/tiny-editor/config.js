@@ -67,7 +67,8 @@ const defaultToolbar = [
   'outdent indent ',
   'pagebreak hr',
   'charmap emoticons',
-  'insertfile image media table link anchor code codesample insertdatetime',
+  'link unlink',
+  'insertfile image media table anchor code codesample insertdatetime',
   'ltr rtl',
   'paste copy cut',
   'preview print'

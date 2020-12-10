@@ -5,7 +5,10 @@ const vueConfig = {
   assetsDir: isProduction ? '/static' : './',
   devServer: {
     disableHostCheck: true,
-    port: 8088,
+    port: 80,
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
     proxy: {
       '/api': {
         target: 'https://www.needing.xin',
@@ -13,6 +16,14 @@ const vueConfig = {
         pathRewrite: {
           '^/api': '/api'
         }
+      },
+      '/xlive': {
+        target: 'http://uat-mlive.bilibili.co',
+        changeOrigin: true
+      },
+      '/xlive/internal/live-admin/': {
+        target: 'http://uat-mlive.bilibili.co',
+        changeOrigin: true
       }
     }
   }
