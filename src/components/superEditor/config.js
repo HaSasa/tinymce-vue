@@ -1,7 +1,12 @@
+// https://activity.hdslb.com/blackboard/static/de8b0fe7cefc13edb9f88e6bf1d5bcf3/fmdajifKW.js ==》中文包地址
+// https://activity.hdslb.com/blackboard/static/de8b0fe7cefc13edb9f88e6bf1d5bcf3/content.min.css ==》skin_url的css
+// https://activity.hdslb.com/blackboard/static/de8b0fe7cefc13edb9f88e6bf1d5bcf3/skin.min.css ==》skin_url的css
+// https://activity.hdslb.com/blackboard/static/de8b0fe7cefc13edb9f88e6bf1d5bcf3/gLnJ79BV3z.css ==》content defalult的css
+
 const defaultOptions = {
   menubar: true,
   branding: false,
-  language_url: false,
+  language_url: false || 'https://activity.hdslb.com/blackboard/static/de8b0fe7cefc13edb9f88e6bf1d5bcf3/fmdajifKW.js',
   height: 500,
   language: 'zh_CN',
   toolbar_mode: 'wrap', // floating wrap sliding scrolling
@@ -13,8 +18,8 @@ const defaultOptions = {
   quickbars_insert_toolbar: 'quicklink quickimage quicktable',
   quickbars_selection_toolbar: 'bold italic | h1 h2 h3 forecolor backcolor blockquote removeformat quicklink',
   // 必须用绝对路径引用，不然iframe引入的css读取不到
-  skin_url: '//lib.baomitu.com/tinymce/5.6.2/skins/ui/oxide',
-  content_css: '//lib.baomitu.com/tinymce/5.6.2/skins/content/default/content.min.css',
+  skin_url: 'https://lib.baomitu.com/tinymce/5.6.2/skins/ui/oxide',
+  content_css: 'https://lib.baomitu.com/tinymce/5.6.2/skins/content/default/content.min.css',
   formats: { blockquote: { block: 'blockquote', styles: { paddingLeft: '15px', borderLeft: '3px solid #ddd' } } }
 }
 
