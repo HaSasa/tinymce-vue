@@ -61,6 +61,7 @@ export default {
         fontsize_formats: '12px 14px 16px 18px 24px 36px 48px 56px 72px',
         language_url: '/tinymce/lang/zh_CN.js',
         skin_url: '/tinymce/skins/ui/oxide', // 必须用绝对路径引用，不然iframe引入的css读取不到
+        content_css: '//lib.baomitu.com/tinymce/5.6.2/skins/content/default/content.min.css',
         quickbars_selection_toolbar: 'bold italic | h1 h2 h3 forecolor backcolor blockquote removeformat quicklink',
         quickbars_insert_toolbar: 'quicklink quickimage quicktable',
         paste_retain_style_properties: 'color background backgroud-color text-align font-size', // 此项设置为空，则从word复制过来的样式，全部不保留
