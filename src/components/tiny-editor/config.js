@@ -14,7 +14,7 @@ import 'tinymce/plugins/charmap'
 import 'tinymce/plugins/code'
 import 'tinymce/plugins/codesample'
 // import 'tinymce/plugins/colorpicker' // 已集成到内部，无需引用
-import 'tinymce/plugins/contextmenu'
+// import 'tinymce/plugins/contextmenu'
 import 'tinymce/plugins/directionality'
 
 import 'tinymce/plugins/emoticons' // 表情需要引用两个
@@ -84,7 +84,7 @@ const defaultPlugins = [
   'code',
   'codesample',
   // 'colorpicker',
-  'contextmenu',
+  // 'contextmenu',
   'directionality',
   'emoticons',
   'fullpage',
